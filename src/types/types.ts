@@ -12,21 +12,20 @@ export interface FailedAPIResponse {
 
 export interface SignUpAPIResponse {
   success: boolean;
-  user: User;
-  accessToken: string;
+  data: User;
   message: string;
 }
 
 export interface SignInAPIResponse {
   success: boolean;
-  user: User;
+  data: User;
   accessToken: string;
   message: string;
 }
 
 export interface GetUserAPIResponse {
   success: boolean;
-  users: User;
+  data: User;
   message: string;
 }
 
