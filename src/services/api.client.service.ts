@@ -6,7 +6,7 @@ import axios, {
 
 // Axios Instance
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL ?? "http://localhost:3000",
+  baseURL: process.env.API_BASE_URL ?? "https://pulseview-be.onrender.com",
   timeout: 60000 * 2,
 });
 
@@ -14,19 +14,11 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config: AxiosRequestConfig): any => {
     const token = localStorage.getItem("accessToken");
-    const currentUser = localStorage.getItem("user");
 
     if (token) {
       config.headers = {
         ...config.headers,
         Authorization: `${token}`,
-      };
-    }
-
-    if (currentUser) {
-      config.headers = {
-        ...config.headers,
-        user: currentUser,
       };
     }
 
