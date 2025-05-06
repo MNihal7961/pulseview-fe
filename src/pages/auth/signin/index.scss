@@ -1,0 +1,47 @@
+.signin-left-section {
+    background-image: url("/images/auth-bg.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  .signin-form {
+    .ant-input-outlined {
+      height: 44px;
+    }
+  
+    .ant-typography {
+      margin-bottom: 0px !important;
+    }
+  
+    .ant-input-outlined:focus {
+      outline: none;
+      box-shadow: none !important;
+    }
+  
+    .ant-select-focused .ant-select-selector {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  
+    .ant-select-outlined:focus {
+      outline: none;
+      box-shadow: none !important;
+    }
+  
+    .password-input {
+      outline: none;
+      box-shadow: none !important;
+    }
+  
+    .ant-form-item-explain-error {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16.8px;
+      letter-spacing: 0.25px;
+      text-align: left;
+      text-underline-position: from-font;
+      text-decoration-skip-ink: none;
+      margin-top: 2px;
+    }
+  }
+  
