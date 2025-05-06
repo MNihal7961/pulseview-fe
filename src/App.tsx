@@ -11,7 +11,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <ConfigProvider theme={theme}>
         <Layout>
-          <Content style={{ width: "100%", maxWidth: 1600, margin: "0 auto" }}>
+          <Content style={{ width: "100%", maxWidth: 1440, margin: "0 auto" }}>
             <Router />
           </Content>
         </Layout>
