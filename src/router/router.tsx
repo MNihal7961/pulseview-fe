@@ -4,6 +4,7 @@ import Home from "../pages/home";
 import Navigator from "./navigator";
 import Signin from "../pages/auth/signin";
 import Signup from "../pages/auth/signup";
+import DashBoard from "../components/DashBoard";
 
 const Router = () => {
   return (
@@ -15,7 +16,9 @@ const Router = () => {
       {/* Default routes */}
       <Route path="/" element={<Navigator />} />
 
-      <Route path="/home" element={<Home />} />
+      <Route path="/dashboard" element={<DashBoard />}>
+        <Route path="home" element={<Home />} />
+      </Route>
 
       {/* Fallback routes */}
       <Route path="*" element={<NotFound />} />

@@ -6,7 +6,7 @@ import axios, {
 
 // Axios Instance
 const apiClient = axios.create({
-  baseURL: process.env.API_BASE_URL ?? "https://pulseview-be.onrender.com",
+  baseURL: import.meta.env.API_BASE_URL ?? "https://pulseview-be.onrender.com",
   timeout: 60000 * 2,
 });
 
