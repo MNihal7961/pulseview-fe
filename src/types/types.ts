@@ -11,21 +11,32 @@ export interface FailedAPIResponse {
 }
 
 export interface SignUpAPIResponse {
-  success: boolean;
+  status: boolean;
   data: User;
   message: string;
 }
 
 export interface SignInAPIResponse {
-  success: boolean;
+  status: boolean;
   data: User;
   accessToken: string;
   message: string;
 }
 
 export interface GetUserAPIResponse {
-  success: boolean;
+  status: boolean;
   data: User;
   message: string;
+}
+
+export interface ShipmentType {
+  _id: string;
+  productName: string;
+  quantity:number;
+  status:'PENDING' | 'IN_TRANSIT' | 'DELIVERED';
+  createdAt: string;
+  updatedAt: string;
+  deleveryDate: string;
+  userId: string;
 }
 
