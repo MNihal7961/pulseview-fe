@@ -29,7 +29,7 @@ export interface GetUserAPIResponse {
   message: string;
 }
 
-export interface Shipment {
+export interface ShipmentType {
   _id: string;
   productName: string;
   quantity:number;

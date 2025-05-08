@@ -1,10 +1,10 @@
 import React from "react";
 import { Card, Descriptions } from "antd";
 import type { DescriptionsProps } from "antd";
-import type { Shipment } from "../../types/types";
+import type { ShipmentType } from "../../types/types";
 
 interface ShipmentCardProps {
-  shipment: Shipment;
+  shipment: ShipmentType;
 }
 
 const ShipmentCard: React.FC<ShipmentCardProps> = ({ shipment }) => {

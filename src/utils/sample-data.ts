@@ -1,6 +1,6 @@
-import type { Shipment } from "../types/types";
+import type { ShipmentType } from "../types/types";
 
-export const shipmentsSampleData: Shipment[] = [
+export const shipmentsSampleData: ShipmentType[] = [
   {
     _id: "1",
     productName: "Paracetamol 500mg",

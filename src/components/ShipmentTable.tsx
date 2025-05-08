@@ -1,8 +1,8 @@
 import React from "react";
-import type { Shipment } from "../types/types";
+import type { ShipmentType } from "../types/types";
 
 interface ShipmentTableProps {
-  data: Shipment[];
+  data: ShipmentType[];
 }
 const ShipmentTable: React.FC<ShipmentTableProps> = ({ data }) => {
   const StatusChip = (status: string) => {
