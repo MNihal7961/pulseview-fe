@@ -1,18 +1,25 @@
 import {
   BarChartOutlined,
+  CloseOutlined,
   HomeOutlined,
   LogoutOutlined,
   MedicineBoxOutlined,
   SettingOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
-import React, { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { authContext } from "../context/AuthContext";
+import { useNotificationApi } from "./Notification";
 
 const DashBoard: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { dispatch } = useContext(authContext);
+  const openNotification = useNotificationApi();
+  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const sideBarMenuItems = [
     { name: "Home", icon: <HomeOutlined />, path: "/dashboard/home" },
@@ -38,11 +45,18 @@ const DashBoard: React.FC = () => {
     },
   ];
 
-  // Auto-close sidebar on route change for small screens
-  React.useEffect(() => {
+  useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
+  const handleLogout = () => {
+    dispatch({ type: "LOGOUT" });
+    openNotification.success({
+      message: "Logged out successfully",
+      type: "success",
+    });
+    navigate("/auth/signin");
+  };
   return (
     <>
       {/* Toggle button for small screens */}
@@ -89,7 +103,7 @@ const DashBoard: React.FC = () => {
                 className="ml-auto sm:hidden text-gray-500 hover:text-gray-900"
                 onClick={() => setIsSidebarOpen(false)}
               >
-                ✕
+                <CloseOutlined />
               </button>
             </Link>
 
@@ -104,7 +118,9 @@ const DashBoard: React.FC = () => {
                   <Link
                     to={item.path}
                     className={`flex items-center p-2 !text-gray-600 !font-normal rounded-lg hover:bg-gray-100 ${
-                      currentPath === item.path ? "!text-[#002A48] !font-semibold" : ""
+                      currentPath === item.path
+                        ? "!text-[#002A48] !font-semibold"
+                        : ""
                     }`}
                   >
                     {item.icon}
@@ -117,7 +133,10 @@ const DashBoard: React.FC = () => {
 
           {/* Bottom Logout Button */}
           <div className="p-2 border-t border-gray-300">
-            <button className="w-full flex items-center justify-center gap-2 p-2 text-white bg-blue-500 rounded-lg">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 p-2 text-white bg-[#002a48] rounded-lg cursor-pointer"
+            >
               <LogoutOutlined /> Logout
             </button>
           </div>
