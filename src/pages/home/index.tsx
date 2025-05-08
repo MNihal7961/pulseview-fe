@@ -3,8 +3,6 @@ import { useLoader } from "../../context/LoaderContext";
 
 const Home: React.FC = () => {
   const { setLoading, setLoadingMessage } = useLoader();
-  setLoading(true);
-  setLoadingMessage("Loading...");
   return (
     <section>
       <div className="grid grid-cols-3 gap-4 mb-4">
