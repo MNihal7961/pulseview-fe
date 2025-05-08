@@ -18,16 +18,13 @@ class AuthService {
     }
   }
 
-  async signIn(payload: SignInUserDTO): Promise<SignInAPIResponse | FailedAPIResponse> {
+  async signIn(payload: SignInUserDTO): Promise<SignInAPIResponse | null> {
     try {
       const response = await apiClient.post("/auth/signin", payload);
       return response.data;
     } catch (error: any) {
       console.error("Error while signing in:", error);
-      return {
-        success: false,
-        message: error.response.data.message,
-      };
+      return null;
     }
   }
 
