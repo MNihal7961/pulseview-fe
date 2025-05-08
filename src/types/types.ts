@@ -29,3 +29,14 @@ export interface GetUserAPIResponse {
   message: string;
 }
 
+export interface Shipment {
+  _id: string;
+  productName: string;
+  quantity:number;
+  status:'PENDING' | 'IN_TRANSIT' | 'DELIVERED';
+  createdAt: string;
+  updatedAt: string;
+  deleveryDate: string;
+  userId: string;
+}
+
