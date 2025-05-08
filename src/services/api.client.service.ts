@@ -39,14 +39,14 @@ apiClient.interceptors.response.use(
       switch (error.response.status) {
         // Handle unauthorized error
         case 401:
-          if (window.location.pathname !== "/sign-in") {
+          if (window.location.pathname !== "/auth/signin") {
             localStorage.clear();
             // window.location.href = "/sign-in";
           }
           break;
         // Handle forbidden error
         case 403:
-          if (window.location.pathname !== "/sign-in") {
+          if (window.location.pathname !== "/auth/signin") {
             // window.location.href = "/sign-in";
           }
           break;

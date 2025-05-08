@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!accessToken) {
     console.log("No token found , redirecting to sign in page");
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/auth/signin" replace />;
   }
 
   return <>{children}</>;
