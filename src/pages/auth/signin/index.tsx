@@ -4,14 +4,23 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import "./index.scss";
 import type { SignInUserDTO } from "../../../types/dto";
 import { authService } from "../../../services/auth.service";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { authContext } from "../../../context/AuthContext";
+import { useNotificationApi } from "../../../components/Notification";
 
 const { Title, Text, Link } = Typography;
 
 const Signin = () => {
-  const { loading } = useLoader();
+  const { dispatch } = useContext(authContext);
+  const { loading, setLoading, setLoadingMessage } = useLoader();
   const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const openNotification = useNotificationApi();
 
   const handleSubmit = async (values: any) => {
+    setLoading(true);
+    setLoadingMessage("Signing in...");
     const payload: SignInUserDTO = {
       email: values.email,
       password: values.password,
@@ -19,6 +28,42 @@ const Signin = () => {
 
     const response = await authService.signIn(payload);
     console.log(response);
+    if (!response) {
+      openNotification.error({
+        message: "Error",
+        description: "Invalid email or password",
+      });
+      setLoading(false);
+      setLoadingMessage(null);
+      return;
+    }
+
+    if (!response.status) {
+      openNotification.error({
+        message: "Error",
+        description: response.message,
+      });
+      setLoading(false);
+      setLoadingMessage(null);
+      return;
+    }
+
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: {
+        accessToken: response.accessToken,
+        user: response.data,
+      },
+    });
+    form.resetFields();
+    setLoading(false);
+    setLoadingMessage(null);
+    openNotification.success({
+      message: "Success",
+      description: "Login successful",
+      type: "success",
+    });
+    navigate("/dashboard/home");
   };
 
   return (
