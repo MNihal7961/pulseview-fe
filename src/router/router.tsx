@@ -5,6 +5,11 @@ import Navigator from "./navigator";
 import Signin from "../pages/auth/signin";
 import Signup from "../pages/auth/signup";
 import DashBoard from "../components/DashBoard";
+import ProtectedRoute from "./protectedRoute";
+import WeightProgress from "../pages/weight-progress";
+import Medication from "../pages/medication";
+import Shipment from "../pages/shipment";
+import Settings from "../pages/settings";
 
 const Router = () => {
   return (
@@ -16,8 +21,19 @@ const Router = () => {
       {/* Default routes */}
       <Route path="/" element={<Navigator />} />
 
-      <Route path="/dashboard" element={<DashBoard />}>
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashBoard />
+          </ProtectedRoute>
+        }
+      >
         <Route path="home" element={<Home />} />
+        <Route path="weight-progress" element={<WeightProgress />} />
+        <Route path="medication" element={<Medication />} />
+        <Route path="shipment" element={<Shipment />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       {/* Fallback routes */}
