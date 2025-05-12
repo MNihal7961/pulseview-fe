@@ -18,8 +18,15 @@ const EmptyRecordWidget: React.FC<EmptyRecordWidgetProps> = ({
   lastUpdatedValue,
 }) => {
   return (
-    <div className="flex items-center justify-center min-h-24 rounded-sm bg-white hover:shadow hover:cursor-pointer">
-      <Card variant="borderless" className="w-full" title={title}>
+    <div className="transition-shadow duration-300 ease-in-out hover:shadow-md rounded-xl bg-white h-full">
+      <Card
+        title={
+          <span className="text-base font-semibold text-gray-700">{title}</span>
+        }
+        variant="borderless"
+        className="w-full shadow-none border border-gray-200"
+        style={{ height: "100%" }}
+      >
         {showCTAButton && (
           <div className="flex flex-col items-center justify-center gap-3">
             <p className="text-gray-500">{CTA}</p>
