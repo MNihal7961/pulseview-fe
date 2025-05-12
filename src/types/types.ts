@@ -90,3 +90,8 @@ export interface Goal{
   createdAt: Date;
   updatedAt: Date
 }
+
+export interface MedicationWithLogs {
+  medication: Medication;
+  logs: MedicationLog[];
+}
