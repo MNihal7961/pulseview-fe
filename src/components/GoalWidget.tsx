@@ -3,8 +3,8 @@ import type { Goal } from "../types/types";
 import { goalsService } from "../services/goals.service";
 import { authContext } from "../context/AuthContext";
 import { Carousel } from "antd";
-import ActiveGoal from "./ActiveGoal";
 import { useNavigate } from "react-router-dom";
+import ActiveGoalCard from "../pages/goal/ActiveGoalCard";
 
 const GoalWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -71,13 +71,16 @@ const GoalWidget: React.FC = () => {
 
   const renderCurrentActiveGoals = () => {
     return (
-      <Carousel autoplay arrows dots>
-        {goals.map((item: Goal, index) => (
-          <div key={index}>
-            <ActiveGoal key={index} goal={item} />
-          </div>
-        ))}
-      </Carousel>
+      <section className="w-full bg-[#F5F5F5]">
+         <h1 className="text-xl text-[#002A48] mb-4 text-center">Active Goals 🎯</h1>
+        <Carousel autoplay arrows dots>
+          {goals.map((item: Goal, index) => (
+            <div key={index} onClick={() => navigate(`/dashboard/goal`)} className="cursor-pointer">
+              <ActiveGoalCard key={index} goal={item} />
+            </div>
+          ))}
+        </Carousel>
+      </section>
     );
   };
 
