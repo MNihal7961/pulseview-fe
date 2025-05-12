@@ -1,172 +1,209 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLoader } from "../../context/LoaderContext";
-import { Card, Statistic } from "antd";
-import { ArrowUpOutlined } from "@ant-design/icons";
+import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import ShipmentTable from "../../components/ShipmentTable";
 import { shipmentsSampleData } from "../../utils/sample-data";
+import { medicationService } from "../../services/medication.service";
+import type { Medication, MedicationWithLogs, WeightEntry } from "../../types/types";
+import { weightEntryService } from "../../services/weight.entry.service";
+import LineChart from "../../components/LineChart";
+import GoalWidget from "../../components/GoalWidget";
+import WidgetCard from "../../components/WidgetCard";
+import EmptyRecordWidget from "../../components/EmptyRecordWidget";
+import { authContext } from "../../context/AuthContext";
+import { medicationLogsService } from "../../services/medication.logs.service";
+
 
 const Home: React.FC = () => {
+  const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
+  const [medicationLogs, setMedicationLogs] = useState<MedicationWithLogs[]>(
+    []
+  );
+
   const upComingShipments = shipmentsSampleData.filter(
     (item) => item.status === "IN_TRANSIT"
   );
 
-  useEffect(()=>{
-    const init =()=>{
-      try{
+  useEffect(() => {
+    const init = async (userId: string) => {
+      try {
         setLoading(true);
         setLoadingMessage("Loading Please Wait...");
-      }catch(error:any){
+
+        const [medications, weightEntries] = await Promise.all([
+          medicationService.findAllMedication(userId),
+          weightEntryService.findAllWeightEntry(userId),
+        ]);
+
+        if (medications?.data && medications?.data.length > 0) {
+          const medicationLogs = await Promise.all(
+            medications.data.map(async (medication: Medication) => {
+              return {
+                medication,
+                logs: await medicationLogsService.findAllMedicationLogByMedicationId(
+                  medication._id
+                ),
+              };
+            })
+          );
+          setMedicationLogs(medicationLogs);
+        }
+
+        setWeightEntries(weightEntries?.data || []);
+      } catch (error: any) {
         console.error("error while initializing: ", error);
-      }finally{
+      } finally {
         setTimeout(() => {
           setLoading(false);
           setLoadingMessage(null);
-        }, 1000)
+        }, 1000);
       }
+    };
+    if (user && user._id) {
+      init(user._id);
     }
-    init();
-  },[])
+  }, [user]);
+
+  const renderWeightEntryWidget = () => {
+    const isNoRecords = weightEntries.length === 0;
+    if (isNoRecords) {
+      const handleCTAButtonClick = () => {};
+      return (
+        <EmptyRecordWidget
+          title="No Weight Entries Found  👀"
+          CTA="Add Weight Entry"
+          handleCTAButtonClick={handleCTAButtonClick}
+          lastUpdatedValue={null}
+          showCTAButton={true}
+        />
+      );
+    }
+
+    const isNoMoreThanOneRecord = weightEntries.length < 2;
+    if (isNoMoreThanOneRecord) {
+      return (
+        <EmptyRecordWidget
+          title="Last Weight Entry  𐄷"
+          CTA="Add Weight Entry"
+          handleCTAButtonClick={() => {}}
+          showCTAButton={false}
+          lastUpdatedValue={`${weightEntries[0].weight} kg`}
+        />
+      );
+    }
+
+    const lastWeightEntry = weightEntries[weightEntries.length - 1];
+    const previousWeightEntry = weightEntries[weightEntries.length - 2];
+
+    const weightDifference =
+      lastWeightEntry.weight - previousWeightEntry.weight;
+
+    const isWeightIncreased = weightDifference > 0;
+
+    const textColor = isWeightIncreased ? "#3f8600" : "#cf1322";
+
+    return (
+      <WidgetCard
+        icon={isWeightIncreased ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+        textColor={textColor}
+        title="Weight Progress  🏋️ 📈"
+        value={lastWeightEntry.weight}
+        unit="kg"
+      />
+    );
+  };
+
+  const renderMedicationWidget = (
+    medicationsWithLogs: MedicationWithLogs[]
+  ) => {
+    const isNoRecords = medicationsWithLogs.length === 0;
+    if (isNoRecords) {
+      const handleCTAButtonClick = () => {};
+      return (
+        <EmptyRecordWidget
+          title="No Medications Found  👀"
+          CTA="Add Medication"
+          handleCTAButtonClick={handleCTAButtonClick}
+          lastUpdatedValue={null}
+          showCTAButton={true}
+        />
+      );
+    }
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
+
+    const upcomingDoses = medicationsWithLogs.flatMap(
+      ({ medication, logs }) => {
+        const medStart = new Date(medication.startDate);
+        const medEnd = new Date(medication.endDate);
+
+        // Check if today is within medication date range
+        if (now < medStart || now > medEnd) return [];
+
+        return medication.timings
+          .filter((timing) => {
+            const isLogged = logs.some(
+              (log) =>
+                log.date.toISOString().startsWith(todayStr) &&
+                log.time === timing.time
+            );
+            return !isLogged;
+          })
+          .map((timing) => ({
+            medicationId: medication._id,
+            type: medication.type,
+            dosage: medication.dosage,
+            time: timing.time,
+            intakeCondition: timing.intakeCondition,
+          }));
+      }
+    );
+
+    return (
+      <div>
+        <h3>Upcoming Medications</h3>
+        {upcomingDoses.length === 0 ? (
+          <p>No upcoming medications for today.</p>
+        ) : (
+          <ul>
+            {upcomingDoses.map((dose, index) => (
+              <li key={index}>
+                <strong>{dose.type}</strong> - {dose.dosage} at{" "}
+                <em>{dose.time}</em> ({dose.intakeCondition})
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
   return (
     <section>
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Your Next Dose 💊"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
-            />
-          </Card>
-        </div>
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Weight Progress 🏋️ 📈"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
-            />
-          </Card>
-        </div>
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Upcoming Shipment 🚚"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
-            />
-          </Card>
-        </div>
+      {/* Sattistics Widgets */}
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {renderMedicationWidget(medicationLogs)}
+        {renderWeightEntryWidget()}
       </div>
-      <div className="flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50">
-        <p className="text-2xl text-gray-400">
-          <svg
-            className="w-3.5 h-3.5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 18"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 1v16M1 9h16"
-            />
-          </svg>
-        </p>
+
+      {/* Weight Progress Graph */}
+      <div className="flex items-center justify-start w-full  mb-4 rounded-sm bg-gray-50">
+        <LineChart weightEntries={weightEntries} />
       </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28">
-          <p className="text-2xl text-gray-400">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
-          </p>
-        </div>
-        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28">
-          <p className="text-2xl text-gray-400">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
-          </p>
-        </div>
-        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28">
-          <p className="text-2xl text-gray-400">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
-          </p>
-        </div>
-        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28">
-          <p className="text-2xl text-gray-400">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
-          </p>
-        </div>
+
+      {/* Goal Widget */}
+      <div className="flex items-center justify-start w-full  mb-4 rounded-sm bg-gray-50">
+        <GoalWidget />
       </div>
+
+      {/* Upcoming Shipments */}
       <div className="mb-4 flex flex-col gap-y-4">
-        <h1 className="text-xl text-center text-[#002A48]">Upcoming Shipments</h1>
-        <ShipmentTable data={upComingShipments}/>
+        <h1 className="text-xl text-center text-[#002A48]">
+          Upcoming Shipments
+        </h1>
+        <ShipmentTable data={upComingShipments} />
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import {
   HomeOutlined,
   LogoutOutlined,
   MedicineBoxOutlined,
+  ScheduleOutlined,
   SettingOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
@@ -37,6 +38,11 @@ const DashBoard: React.FC = () => {
       name: "Shipments",
       icon: <TruckOutlined />,
       path: "/dashboard/shipment",
+    },
+    {
+      name: "Goals",
+      icon: <ScheduleOutlined />,
+      path: "/dashboard/goal",
     },
     {
       name: "Settings",

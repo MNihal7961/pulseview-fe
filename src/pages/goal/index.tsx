@@ -1,25 +1,26 @@
+import { Carousel } from "antd";
 import React, { useContext, useEffect, useState } from "react";
 import { authContext } from "../../context/AuthContext";
 import { useLoader } from "../../context/LoaderContext";
-import type { WeightEntry } from "../../types/types";
-import { weightEntryService } from "../../services/weight.entry.service";
-import WeightEntriesTable from "../../components/WeightEntriesTable";
+import type { Goal } from "../../types/types";
+import { goalsService } from "../../services/goals.service";
+import GoalsTable from "../../components/GoalsTable";
 
-const WeightProgress: React.FC = () => {
+const Goal: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
-  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   useEffect(() => {
     const init = async (userId: string) => {
       try {
         setLoading(true);
-        setLoadingMessage("Loading weight entries please wait...");
-        const response = await weightEntryService.findAllWeightEntry(userId);
+        setLoadingMessage("Loading goals please wait...");
+        const response = await goalsService.findAllGoals(userId);
         if (response.success && response.data.length > 0) {
-          setWeightEntries(response.data);
+          setGoals(response.data);
         } else {
-          setWeightEntries([]);
+          setGoals([]);
         }
       } catch (error: any) {
         console.error("error while initializing: ", error);
@@ -35,18 +36,18 @@ const WeightProgress: React.FC = () => {
 
   return (
     <section className="mb-4 flex flex-col gap-y-4">
-      {/* <h1 className="text-xl text-[#002A48]">Upcoming Shipments</h1> */}
-      {/* <Carousel autoplay arrows dots>
-        {upComingShipments.map((item: ShipmentType, index) => (
+      <h1 className="text-xl text-[#002A48]">Active Goals 🎯</h1>
+      <Carousel autoplay arrows dots>
+        {/* {upComingShipments.map((item: ShipmentType, index) => (
           <div key={index}>
             <ShipmentCard key={index} shipment={item} />
           </div>
-        ))}
-      </Carousel> */}
-      <h1 className="text-xl text-[#002A48]">All Weight Entries</h1>
-      <WeightEntriesTable data={weightEntries} />
+        ))} */}
+      </Carousel>
+      <h1 className="text-xl text-[#002A48]">All Goals</h1>
+      <GoalsTable data={goals} />
     </section>
   );
 };
 
-export default WeightProgress;
+export default Goal;
