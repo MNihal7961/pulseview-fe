@@ -26,6 +26,7 @@ const ShipmentTable: React.FC<ShipmentTableProps> = ({ data }) => {
       </div>
     );
   };
+  
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500">

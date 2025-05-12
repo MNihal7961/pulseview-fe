@@ -9,7 +9,6 @@ import ProtectedRoute from "./protectedRoute";
 import WeightProgress from "../pages/weight-progress";
 import Medication from "../pages/medication";
 import Shipment from "../pages/shipment";
-import Settings from "../pages/settings";
 import Goal from "../pages/goal";
 
 const Router = () => {
@@ -35,7 +34,6 @@ const Router = () => {
         <Route path="medication" element={<Medication />} />
         <Route path="shipment" element={<Shipment />} />
         <Route path="goal" element={<Goal />} />
-        <Route path="settings" element={<Settings />} />
       </Route>
 
       {/* Fallback routes */}
