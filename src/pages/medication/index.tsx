@@ -90,7 +90,7 @@ const Medication: React.FC = () => {
       <h1 className="text-xl text-[#002A48]">Upcoming Medications</h1>
       <Carousel autoplay arrows dots>
         {getUpcomingMedications(medications).map((item: any, index) => (
-          <div key={index}></div>
+          <div key={index}>{JSON.stringify(item)}</div>
         ))}
       </Carousel>
 
