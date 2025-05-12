@@ -5,7 +5,6 @@ import {
   LogoutOutlined,
   MedicineBoxOutlined,
   ScheduleOutlined,
-  SettingOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
 import React, { useContext, useEffect, useState } from "react";
@@ -43,11 +42,6 @@ const DashBoard: React.FC = () => {
       name: "Goals",
       icon: <ScheduleOutlined />,
       path: "/dashboard/goal",
-    },
-    {
-      name: "Settings",
-      icon: <SettingOutlined />,
-      path: "/dashboard/settings",
     },
   ];
 
