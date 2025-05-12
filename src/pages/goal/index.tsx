@@ -11,7 +11,7 @@ import GoalModal from "../../components/GoalModal";
 import type { CreateGoalDTO } from "../../types/dto";
 import ActiveGoalCard from "./ActiveGoalCard";
 
-const Goal: React.FC = () => {
+const GoalPage: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -246,4 +246,4 @@ const Goal: React.FC = () => {
   );
 };
 
-export default Goal;
+export default GoalPage;
