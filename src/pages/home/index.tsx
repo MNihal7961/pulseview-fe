@@ -4,7 +4,11 @@ import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import ShipmentTable from "../../components/ShipmentTable";
 import { shipmentsSampleData } from "../../utils/sample-data";
 import { medicationService } from "../../services/medication.service";
-import type { Medication, MedicationWithLogs, WeightEntry } from "../../types/types";
+import type {
+  Medication,
+  MedicationWithLogs,
+  WeightEntry,
+} from "../../types/types";
 import { weightEntryService } from "../../services/weight.entry.service";
 import LineChart from "../../components/LineChart";
 import GoalWidget from "../../components/GoalWidget";
@@ -12,11 +16,13 @@ import WidgetCard from "../../components/WidgetCard";
 import EmptyRecordWidget from "../../components/EmptyRecordWidget";
 import { authContext } from "../../context/AuthContext";
 import { medicationLogsService } from "../../services/medication.logs.service";
-
+import { useNavigate } from "react-router-dom";
 
 const Home: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
+  const navigate = useNavigate();
+
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [medicationLogs, setMedicationLogs] = useState<MedicationWithLogs[]>(
     []
@@ -69,7 +75,9 @@ const Home: React.FC = () => {
   const renderWeightEntryWidget = () => {
     const isNoRecords = weightEntries.length === 0;
     if (isNoRecords) {
-      const handleCTAButtonClick = () => {};
+      const handleCTAButtonClick = () => {
+        navigate("/dashboard/weight-progress");
+      };
       return (
         <EmptyRecordWidget
           title="No Weight Entries Found  👀"
