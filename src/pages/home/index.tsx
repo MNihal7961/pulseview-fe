@@ -1,36 +1,56 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLoader } from "../../context/LoaderContext";
-import { Card, Statistic } from "antd";
-import { ArrowUpOutlined } from "@ant-design/icons";
+import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import ShipmentTable from "../../components/ShipmentTable";
 import { shipmentsSampleData } from "../../utils/sample-data";
 import { medicationService } from "../../services/medication.service";
-import type { Medication, WeightEntry } from "../../types/types";
+import type { Medication, MedicationWithLogs, WeightEntry } from "../../types/types";
 import { weightEntryService } from "../../services/weight.entry.service";
 import LineChart from "../../components/LineChart";
 import GoalWidget from "../../components/GoalWidget";
+import WidgetCard from "../../components/WidgetCard";
+import EmptyRecordWidget from "../../components/EmptyRecordWidget";
+import { authContext } from "../../context/AuthContext";
+import { medicationLogsService } from "../../services/medication.logs.service";
+
 
 const Home: React.FC = () => {
+  const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
-  const [medications, setMedications] = useState<Medication[]>([]);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
+  const [medicationLogs, setMedicationLogs] = useState<MedicationWithLogs[]>(
+    []
+  );
 
   const upComingShipments = shipmentsSampleData.filter(
     (item) => item.status === "IN_TRANSIT"
   );
 
   useEffect(() => {
-    const init = async () => {
+    const init = async (userId: string) => {
       try {
         setLoading(true);
         setLoadingMessage("Loading Please Wait...");
 
         const [medications, weightEntries] = await Promise.all([
-          medicationService.findAllMedication("1"),
-          weightEntryService.findAllWeightEntry("1"),
+          medicationService.findAllMedication(userId),
+          weightEntryService.findAllWeightEntry(userId),
         ]);
 
-        setMedications(medications?.data || []);
+        if (medications?.data && medications?.data.length > 0) {
+          const medicationLogs = await Promise.all(
+            medications.data.map(async (medication: Medication) => {
+              return {
+                medication,
+                logs: await medicationLogsService.findAllMedicationLogByMedicationId(
+                  medication._id
+                ),
+              };
+            })
+          );
+          setMedicationLogs(medicationLogs);
+        }
+
         setWeightEntries(weightEntries?.data || []);
       } catch (error: any) {
         console.error("error while initializing: ", error);
@@ -41,73 +61,144 @@ const Home: React.FC = () => {
         }, 1000);
       }
     };
-    init();
-  }, []);
+    if (user && user._id) {
+      init(user._id);
+    }
+  }, [user]);
 
-  // const renderWeightEntryWidget = () => {
-  //   const isNoRecords = weightEntries.length === 0;
-  //   const isNoMoreThanOneRecord = weightEntries.length < 2;
-  //   const isMoreThanOneRecord = weightEntries.length > 1;
+  const renderWeightEntryWidget = () => {
+    const isNoRecords = weightEntries.length === 0;
+    if (isNoRecords) {
+      const handleCTAButtonClick = () => {};
+      return (
+        <EmptyRecordWidget
+          title="No Weight Entries Found  👀"
+          CTA="Add Weight Entry"
+          handleCTAButtonClick={handleCTAButtonClick}
+          lastUpdatedValue={null}
+          showCTAButton={true}
+        />
+      );
+    }
 
-  //   const lastWeightEntry = weightEntries[weightEntries.length - 1];
-  //   const previousWeightEntry = weightEntries[weightEntries.length - 2];
+    const isNoMoreThanOneRecord = weightEntries.length < 2;
+    if (isNoMoreThanOneRecord) {
+      return (
+        <EmptyRecordWidget
+          title="Last Weight Entry  𐄷"
+          CTA="Add Weight Entry"
+          handleCTAButtonClick={() => {}}
+          showCTAButton={false}
+          lastUpdatedValue={`${weightEntries[0].weight} kg`}
+        />
+      );
+    }
 
-  //   const weightDifference =
-  //     lastWeightEntry.weight - previousWeightEntry.weight;
-  //   const percentageChange =
-  //     (Math.abs(weightDifference) / previousWeightEntry.weight) * 100;
+    const lastWeightEntry = weightEntries[weightEntries.length - 1];
+    const previousWeightEntry = weightEntries[weightEntries.length - 2];
 
-  //   const isWeightIncreased = weightDifference > 0;
+    const weightDifference =
+      lastWeightEntry.weight - previousWeightEntry.weight;
 
-  //   const textColor = isWeightIncreased ? "#3f8600" : "#cf1322";
-  // };
+    const isWeightIncreased = weightDifference > 0;
+
+    const textColor = isWeightIncreased ? "#3f8600" : "#cf1322";
+
+    return (
+      <WidgetCard
+        icon={isWeightIncreased ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+        textColor={textColor}
+        title="Weight Progress  🏋️ 📈"
+        value={lastWeightEntry.weight}
+        unit="kg"
+      />
+    );
+  };
+
+  const renderMedicationWidget = (
+    medicationsWithLogs: MedicationWithLogs[]
+  ) => {
+    const isNoRecords = medicationsWithLogs.length === 0;
+    if (isNoRecords) {
+      const handleCTAButtonClick = () => {};
+      return (
+        <EmptyRecordWidget
+          title="No Medications Found  👀"
+          CTA="Add Medication"
+          handleCTAButtonClick={handleCTAButtonClick}
+          lastUpdatedValue={null}
+          showCTAButton={true}
+        />
+      );
+    }
+    const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
+
+    const upcomingDoses = medicationsWithLogs.flatMap(
+      ({ medication, logs }) => {
+        const medStart = new Date(medication.startDate);
+        const medEnd = new Date(medication.endDate);
+
+        // Check if today is within medication date range
+        if (now < medStart || now > medEnd) return [];
+
+        return medication.timings
+          .filter((timing) => {
+            const isLogged = logs.some(
+              (log) =>
+                log.date.toISOString().startsWith(todayStr) &&
+                log.time === timing.time
+            );
+            return !isLogged;
+          })
+          .map((timing) => ({
+            medicationId: medication._id,
+            type: medication.type,
+            dosage: medication.dosage,
+            time: timing.time,
+            intakeCondition: timing.intakeCondition,
+          }));
+      }
+    );
+
+    return (
+      <div>
+        <h3>Upcoming Medications</h3>
+        {upcomingDoses.length === 0 ? (
+          <p>No upcoming medications for today.</p>
+        ) : (
+          <ul>
+            {upcomingDoses.map((dose, index) => (
+              <li key={index}>
+                <strong>{dose.type}</strong> - {dose.dosage} at{" "}
+                <em>{dose.time}</em> ({dose.intakeCondition})
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
     <section>
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Your Next Dose 💊"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
-            />
-          </Card>
-        </div>
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Weight Progress 🏋️ 📈"
-              value={weightEntries[weightEntries.length - 1]?.weight || 0}
-              precision={0}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="Kg"
-            />
-          </Card>
-        </div>
-        <div className="flex items-center justify-center min-h-24 rounded-sm bg-gray-50 hover:shadow hover:cursor-pointer">
-          <Card variant="borderless" className="w-full">
-            <Statistic
-              title="Upcoming Shipment 🚚"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
-            />
-          </Card>
-        </div>
+      {/* Sattistics Widgets */}
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {renderMedicationWidget(medicationLogs)}
+        {renderWeightEntryWidget()}
       </div>
+
+      {/* Weight Progress Graph */}
       <div className="flex items-center justify-start w-full  mb-4 rounded-sm bg-gray-50">
         <LineChart weightEntries={weightEntries} />
       </div>
+
+      {/* Goal Widget */}
       <div className="flex items-center justify-start w-full  mb-4 rounded-sm bg-gray-50">
         <GoalWidget />
       </div>
+
+      {/* Upcoming Shipments */}
       <div className="mb-4 flex flex-col gap-y-4">
         <h1 className="text-xl text-center text-[#002A48]">
           Upcoming Shipments
