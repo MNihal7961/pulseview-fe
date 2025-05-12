@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLoader } from "../../context/LoaderContext";
-import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import ShipmentTable from "../../components/ShipmentTable";
 import { shipmentsSampleData } from "../../utils/sample-data";
 import { medicationService } from "../../services/medication.service";
@@ -89,38 +88,23 @@ const Home: React.FC = () => {
       );
     }
 
-    const isNoMoreThanOneRecord = weightEntries.length < 2;
-    if (isNoMoreThanOneRecord) {
+    const lastUpdatedWeightEntry = weightEntries[weightEntries.length - 1];
+
+    const handleCTAButtonClick = () => {
+      navigate("/dashboard/weight-progress");
+    };
+
+    if (lastUpdatedWeightEntry) {
       return (
-        <EmptyRecordWidget
-          title="Last Weight Entry  𐄷"
-          CTA="Add Weight Entry"
-          handleCTAButtonClick={() => {}}
-          showCTAButton={false}
-          lastUpdatedValue={`${weightEntries[0].weight} kg`}
+        <WidgetCard
+          title="Weight Progress  🏋️ 📈"
+          value={lastUpdatedWeightEntry.weight}
+          unit="kg"
+          lastUpdatedOn={lastUpdatedWeightEntry?.createdAt}
+          handleClick={handleCTAButtonClick}
         />
       );
     }
-
-    const lastWeightEntry = weightEntries[weightEntries.length - 1];
-    const previousWeightEntry = weightEntries[weightEntries.length - 2];
-
-    const weightDifference =
-      lastWeightEntry.weight - previousWeightEntry.weight;
-
-    const isWeightIncreased = weightDifference > 0;
-
-    const textColor = isWeightIncreased ? "#3f8600" : "#cf1322";
-
-    return (
-      <WidgetCard
-        icon={isWeightIncreased ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-        textColor={textColor}
-        title="Weight Progress  🏋️ 📈"
-        value={lastWeightEntry.weight}
-        unit="kg"
-      />
-    );
   };
 
   const renderMedicationWidget = (
