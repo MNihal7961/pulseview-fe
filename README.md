@@ -10,6 +10,10 @@
    ```bash
    npm i
    ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
 ## Environment Variables Setup
 1. Create a file named `.env`
