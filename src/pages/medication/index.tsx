@@ -2,15 +2,28 @@ import React, { useContext, useEffect, useState } from "react";
 import { useLoader } from "../../context/LoaderContext";
 import { authContext } from "../../context/AuthContext";
 import { medicationService } from "../../services/medication.service";
-import type { MedicationWithLogs } from "../../types/types";
+import type { Medication, MedicationWithLogs } from "../../types/types";
 import { Carousel } from "antd";
 import MedicationTable from "../../components/MedicationTable";
 import { medicationLogsService } from "../../services/medication.logs.service";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import type { CreateMedicationDTO } from "../../types/dto";
+import { useNotificationApi } from "../../components/Notification";
+import MedicationModal from "../../components/MedicationModal";
 
 const Medication: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
+  const openNotification = useNotificationApi();
+
   const [medications, setMedications] = useState<MedicationWithLogs[]>([]);
+
+  const [showMedicationModal, setShowMedicationModal] =
+    useState<boolean>(false);
+  const [action, setAction] = useState<"add" | "edit" | null>(null);
+  const [selectedMedication, setSelectedMedication] =
+    useState<Medication | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
   useEffect(() => {
     const init = async (userId: string) => {
@@ -85,6 +98,92 @@ const Medication: React.FC = () => {
     return upcomingDoses;
   };
 
+  const handleDeleteClick = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setSelectedMedication(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleAddClick = () => {
+    setAction("add");
+    setShowMedicationModal(true);
+  };
+
+  const handleEditClick = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setAction("edit");
+    setShowMedicationModal(true);
+  };
+
+  const handleMedicationCancel = () => {
+    setAction(null);
+    setShowMedicationModal(false);
+    if (selectedMedication) {
+      setSelectedMedication(null);
+    }
+  };
+
+  const handleDeleteMedication = async () => {
+    if (!selectedMedication) return;
+    try {
+      setLoading(true);
+      setLoadingMessage("Deleting medication please wait...");
+    } catch (error: any) {
+      console.error("error while deleting medication: ", error);
+    } finally {
+      setLoading(false);
+      setLoadingMessage(null);
+    }
+  };
+
+  const handleSaveMedication = async (values: any, action: "add" | "edit") => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      setLoadingMessage("Saving medication please wait...");
+
+      if (action === "add") {
+        const payload: CreateMedicationDTO = {
+          dosage: values.dosage,
+          endDate: values.endDate,
+          startDate: values.startDate,
+          timings: values.timings,
+          type: values.type,
+          userId: user._id,
+        };
+        const response = await medicationService.createMedication(payload);
+        if (response.success) {
+          openNotification.success({
+            message: "Success",
+            description: "Medication saved successfully",
+            type: "success",
+          });
+          setMedications([
+            ...medications,
+            { logs: [], medication: response.data },
+          ]);
+          handleMedicationCancel();
+        } else {
+          openNotification.error({
+            message: "Error",
+            description: response.message,
+            type: "error",
+          });
+        }
+      } else if (action === "edit" && selectedMedication) {
+        console.log("selected medication: ", selectedMedication);
+      }
+    } catch (error: any) {
+      console.error("error while saving medication: ", error);
+    } finally {
+      setLoading(false);
+      setLoadingMessage(null);
+    }
+  };
   return (
     <section className="mb-4 flex flex-col gap-y-4">
       <h1 className="text-xl text-[#002A48]">Upcoming Medications</h1>
@@ -93,9 +192,38 @@ const Medication: React.FC = () => {
           <div key={index}>{JSON.stringify(item)}</div>
         ))}
       </Carousel>
+      <div className=" w-full flex flex-row justify-between items-center gap-4 mb-4">
+        <h1 className="text-xl text-[#002A48]">My Medications</h1>
+        <div className="flex flex-row gap-4">
+          <button
+            onClick={handleAddClick}
+            className="p-2  bg-[#003366] text-white hover:bg-[#002a48] font-normal rounded-[5px] !cursor-pointer"
+          >
+            Add Medication
+          </button>
+        </div>
+      </div>
+      <MedicationTable data={medications} handleDeleteClick={handleDeleteClick} handleEditClick={handleEditClick}/>
 
-      <h1 className="text-xl text-[#002A48]">My Medications</h1>
-      <MedicationTable data={medications} />
+      {action && showMedicationModal && (
+        <MedicationModal
+          action={action}
+          handleClose={handleMedicationCancel}
+          isOpen={showMedicationModal}
+          handlesaveMedication={handleSaveMedication}
+          defaultValue={selectedMedication}
+        />
+      )}
+
+      {showDeleteModal && selectedMedication && (
+        <DeleteConfirmationModal
+          description="Are you sure you want to delete this medication?"
+          isOpen={showDeleteModal}
+          handleCancel={handleDeleteCancel}
+          handleClose={handleDeleteCancel}
+          handleConfirm={handleDeleteMedication}
+        />
+      )}
     </section>
   );
 };
