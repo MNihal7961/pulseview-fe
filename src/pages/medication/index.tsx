@@ -12,7 +12,7 @@ import { useNotificationApi } from "../../components/Notification";
 import MedicationModal from "../../components/MedicationModal";
 import MedicationCard from "./MedicationCard";
 
-const Medication: React.FC = () => {
+const MedicationPage: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
   const openNotification = useNotificationApi();
@@ -223,12 +223,16 @@ const Medication: React.FC = () => {
   };
   return (
     <section className="mb-4 flex flex-col gap-y-4">
-      <h1 className="text-xl text-[#002A48]">Upcoming Medications</h1>
-      <Carousel autoplay arrows dots>
-        {getUpcomingMedications(medications).map((item: any, index) => (
-          <MedicationCard key={index} data={item} />
-        ))}
-      </Carousel>
+      {getUpcomingMedications(medications).length > 0 && (
+        <>
+          <h1 className="text-xl text-[#002A48]">Upcoming Medications</h1>
+          <Carousel autoplay arrows dots>
+            {getUpcomingMedications(medications).map((item: any, index) => (
+              <MedicationCard key={index} data={item} />
+            ))}
+          </Carousel>
+        </>
+      )}
       <div className=" w-full flex flex-row justify-between items-center gap-4 mb-4">
         <h1 className="text-xl text-[#002A48]">My Medications</h1>
         <div className="flex flex-row gap-4">
@@ -269,4 +273,4 @@ const Medication: React.FC = () => {
   );
 };
 
-export default Medication;
+export default MedicationPage;

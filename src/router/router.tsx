@@ -7,16 +7,31 @@ import Signup from "../pages/auth/signup";
 import DashBoard from "../components/DashBoard";
 import ProtectedRoute from "./protectedRoute";
 import WeightProgress from "../pages/weight-progress";
-import Medication from "../pages/medication";
+import MedicationPage from "../pages/medication";
 import Shipment from "../pages/shipment";
 import GoalPage from "../pages/goal";
+import UnauthorizedRoute from "./UnAuthorizedRoute";
 
 const Router = () => {
   return (
     <Routes>
       {/* Auth routes */}
-      <Route path="/auth/signin" element={<Signin />} />
-      <Route path="/auth/signup" element={<Signup />} />
+      <Route
+        path="/auth/signin"
+        element={
+          <UnauthorizedRoute>
+            <Signin />
+          </UnauthorizedRoute>
+        }
+      />
+      <Route
+        path="/auth/signup"
+        element={
+          <UnauthorizedRoute>
+            <Signup />
+          </UnauthorizedRoute>
+        }
+      />
 
       {/* Default routes */}
       <Route path="/" element={<Navigator />} />
@@ -31,7 +46,7 @@ const Router = () => {
       >
         <Route path="home" element={<Home />} />
         <Route path="weight-progress" element={<WeightProgress />} />
-        <Route path="medication" element={<Medication />} />
+        <Route path="medication" element={<MedicationPage />} />
         <Route path="shipment" element={<Shipment />} />
         <Route path="goal" element={<GoalPage />} />
       </Route>

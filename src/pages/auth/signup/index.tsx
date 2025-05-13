@@ -4,23 +4,54 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import "./index.scss";
 import type { SignUpUserDTO } from "../../../types/dto";
 import { authService } from "../../../services/auth.service";
+import { useNotificationApi } from "../../../components/Notification";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Link } = Typography;
 
 const Signup = () => {
-  const { loading } = useLoader();
+  const { loading, setLoading, setLoadingMessage } = useLoader();
   const [form] = Form.useForm();
+  const openNotification = useNotificationApi();
+  const navigate = useNavigate();
 
   const handleSubmit = async (values: any) => {
-    const payload: SignUpUserDTO = {
-      email: values.email,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      password: values.password,
-    };
+    try {
+      setLoading(true);
+      setLoadingMessage("Signing up...");
 
-    const response = await authService.signUp(payload);
-    console.log(response);
+      const payload: SignUpUserDTO = {
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        password: values.password,
+      };
+
+      const response = await authService.signUp(payload);
+
+      if (response.success) {
+        openNotification.success({
+          message: "Success",
+          description: response.message,
+        });
+        navigate("/auth/signin");
+        return;
+      } else {
+        openNotification.error({
+          message: "Error",
+          description: response.message,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error while signing up: ", error);
+      openNotification.error({
+        message: "Error",
+        description: error.response.data.message,
+      });
+    } finally {
+      setLoading(false);
+      setLoadingMessage(null);
+    }
   };
 
   return (

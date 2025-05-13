@@ -1,11 +1,11 @@
 import type { SignInUserDTO, SignUpUserDTO } from "../types/dto";
-import type { FailedAPIResponse, GetUserAPIResponse, SignInAPIResponse, SignUpAPIResponse } from "../types/types";
+import type { FailedAPIResponse, GetUserAPIResponse, SignInAPIResponse } from "../types/types";
 import apiClient from "./api.client.service";
 
 class AuthService {
   async signUp(
     payload: SignUpUserDTO
-  ): Promise<SignUpAPIResponse | FailedAPIResponse> {
+  ): Promise<any> {
     try {
       const response = await apiClient.post("/auth/signup", payload);
       return response.data;
