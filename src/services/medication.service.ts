@@ -16,9 +16,12 @@ class MedicationService {
     }
   }
 
-  async findAllMedication(userId: string) {
+  async findAllMedicationByUserId(userId: string) {
     try {
       const response = await apiClient.get(`/medications?userId=${userId}`);
+       if(!response.data.success){
+        console.error("Error while finding medication by user: ", response.data);
+      }
       return response.data;
     } catch (error: any) {
       console.error("Error while finding medication: ", error);
@@ -32,6 +35,9 @@ class MedicationService {
   async findMedicationById(id: string) {
     try {
       const response = await apiClient.get(`/medications/${id}`);
+      if(!response.data.success){
+        console.error("Error while finding medication by id: ", response.data);
+      }
       return response.data;
     } catch (error: any) {
       console.error("Error while finding medication by id: ", error);
