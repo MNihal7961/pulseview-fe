@@ -16,6 +16,7 @@ import EmptyRecordWidget from "../../components/EmptyRecordWidget";
 import { authContext } from "../../context/AuthContext";
 import { medicationLogsService } from "../../services/medication.logs.service";
 import { useNavigate } from "react-router-dom";
+import { Carousel } from "antd";
 
 const Home: React.FC = () => {
   const { user } = useContext(authContext);
@@ -38,21 +39,24 @@ const Home: React.FC = () => {
         setLoadingMessage("Loading Please Wait...");
 
         const [medications, weightEntries] = await Promise.all([
-          medicationService.findAllMedication(userId),
+          medicationService.findAllMedicationByUserId(userId),
           weightEntryService.findAllWeightEntry(userId),
         ]);
 
         if (medications?.data && medications?.data.length > 0) {
           const medicationLogs = await Promise.all(
             medications.data.map(async (medication: Medication) => {
+              const result =
+                await medicationLogsService.findAllMedicationLogByMedicationId(
+                  medication._id
+                );
               return {
                 medication,
-                logs: await medicationLogsService.findAllMedicationLogByMedicationId(
-                  medication._id
-                ),
+                logs: result?.data || [],
               };
             })
           );
+
           setMedicationLogs(medicationLogs);
         }
 
@@ -102,6 +106,8 @@ const Home: React.FC = () => {
           unit="kg"
           lastUpdatedOn={lastUpdatedWeightEntry?.createdAt}
           handleClick={handleCTAButtonClick}
+          intakeCondition={null}
+          medicationTiming={null}
         />
       );
     }
@@ -130,8 +136,6 @@ const Home: React.FC = () => {
       ({ medication, logs }) => {
         const medStart = new Date(medication.startDate);
         const medEnd = new Date(medication.endDate);
-
-        // Check if today is within medication date range
         if (now < medStart || now > medEnd) return [];
 
         return medication.timings
@@ -154,21 +158,20 @@ const Home: React.FC = () => {
     );
 
     return (
-      <div>
-        <h3>Upcoming Medications</h3>
-        {upcomingDoses.length === 0 ? (
-          <p>No upcoming medications for today.</p>
-        ) : (
-          <ul>
-            {upcomingDoses.map((dose, index) => (
-              <li key={index}>
-                <strong>{dose.type}</strong> - {dose.dosage} at{" "}
-                <em>{dose.time}</em> ({dose.intakeCondition})
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <Carousel autoplay arrows dots>
+        {upcomingDoses.map((item: any, index) => (
+          <WidgetCard
+            key={index}
+            title="Upcoming Doses 👀"
+            value={item.type}
+            unit={item.dosage}
+            lastUpdatedOn={null}
+            handleClick={() => navigate("/dashboard/medication")}
+            intakeCondition={item.intakeCondition}
+            medicationTiming={item.time}
+          />
+        ))}
+      </Carousel>
     );
   };
 
