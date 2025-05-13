@@ -10,13 +10,28 @@ import WeightProgress from "../pages/weight-progress";
 import MedicationPage from "../pages/medication";
 import Shipment from "../pages/shipment";
 import GoalPage from "../pages/goal";
+import UnauthorizedRoute from "./UnAuthorizedRoute";
 
 const Router = () => {
   return (
     <Routes>
       {/* Auth routes */}
-      <Route path="/auth/signin" element={<Signin />} />
-      <Route path="/auth/signup" element={<Signup />} />
+      <Route
+        path="/auth/signin"
+        element={
+          <UnauthorizedRoute>
+            <Signin />
+          </UnauthorizedRoute>
+        }
+      />
+      <Route
+        path="/auth/signup"
+        element={
+          <UnauthorizedRoute>
+            <Signup />
+          </UnauthorizedRoute>
+        }
+      />
 
       {/* Default routes */}
       <Route path="/" element={<Navigator />} />
