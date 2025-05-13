@@ -12,7 +12,7 @@ import { useNotificationApi } from "../../components/Notification";
 import MedicationModal from "../../components/MedicationModal";
 import MedicationCard from "./MedicationCard";
 
-const Medication: React.FC = () => {
+const MedicationPage: React.FC = () => {
   const { user } = useContext(authContext);
   const { setLoading, setLoadingMessage } = useLoader();
   const openNotification = useNotificationApi();
@@ -269,4 +269,4 @@ const Medication: React.FC = () => {
   );
 };
 
-export default Medication;
+export default MedicationPage;
