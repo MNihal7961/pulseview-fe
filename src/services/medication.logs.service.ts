@@ -19,8 +19,11 @@ class MedicationLogsService {
   async findAllMedicationLogByUserId(userId: string) {
     try {
       const response = await apiClient.get(
-        `/medications/logs?userId=${userId}`
+        `/medications/logs/find?userId=${userId}`
       );
+       if(!response.data.success){
+        console.error("Error while finding medication logs by user: ", response.data);
+      }
       return response.data;
     } catch (error: any) {
       console.error("Error while finding medication logs: ", error);
@@ -34,8 +37,11 @@ class MedicationLogsService {
   async findAllMedicationLogByMedicationId(medicationId: string) {
     try {
       const response = await apiClient.get(
-        `/medications/logs?userId=${medicationId}`
+        `/medications/logs/find?userId=${medicationId}`
       );
+        if(!response.data.success){
+        console.error("Error while finding medication logs by medication: ", response.data);
+      }
       return response.data;
     } catch (error: any) {
       console.error("Error while finding medication logs: ", error);
