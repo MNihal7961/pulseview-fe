@@ -10,6 +10,7 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import type { CreateMedicationDTO } from "../../types/dto";
 import { useNotificationApi } from "../../components/Notification";
 import MedicationModal from "../../components/MedicationModal";
+import MedicationCard from "./MedicationCard";
 
 const Medication: React.FC = () => {
   const { user } = useContext(authContext);
@@ -30,15 +31,19 @@ const Medication: React.FC = () => {
       try {
         setLoading(true);
         setLoadingMessage("Loading medication please wait...");
-        const response = await medicationService.findAllMedication(userId);
-        if (response.success && response.data.length > 0) {
+        const response = await medicationService.findAllMedicationByUserId(
+          userId
+        );
+        if (response.success && response.data) {
           const medicationWithLogs = await Promise.all(
-            response.data.map(async (medication: any) => {
+            response.data.map(async (medication: Medication) => {
+              const result =
+                await medicationLogsService.findAllMedicationLogByMedicationId(
+                  medication._id
+                );
               return {
                 medication,
-                logs: await medicationLogsService.findAllMedicationLogByMedicationId(
-                  medication._id
-                ),
+                logs: result?.data || [],
               };
             })
           );
@@ -67,6 +72,7 @@ const Medication: React.FC = () => {
     time: string;
     intakeCondition: string;
   }[] => {
+    console.log("🚀 ~ medicationWithLogs:", medicationWithLogs);
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
 
@@ -141,6 +147,7 @@ const Medication: React.FC = () => {
   };
 
   const handleSaveMedication = async (values: any, action: "add" | "edit") => {
+    console.log("🚀 ~ handleSaveMedication ~ values:", values);
     if (!user) return;
     try {
       setLoading(true);
@@ -149,8 +156,8 @@ const Medication: React.FC = () => {
       if (action === "add") {
         const payload: CreateMedicationDTO = {
           dosage: values.dosage,
-          endDate: values.endDate,
-          startDate: values.startDate,
+          endDate: new Date(values.endDate),
+          startDate: new Date(values.startDate),
           timings: values.timings,
           type: values.type,
           userId: user._id,
@@ -175,7 +182,37 @@ const Medication: React.FC = () => {
           });
         }
       } else if (action === "edit" && selectedMedication) {
-        console.log("selected medication: ", selectedMedication);
+        const response = await medicationService.updateMedication(
+          selectedMedication._id,
+          values
+        );
+        if (response.success) {
+          openNotification.success({
+            message: "Success",
+            description: "Medication updated successfully",
+            type: "success",
+          });
+          const updatedMedications = medications.map((medication) => {
+            if (medication.medication._id === selectedMedication._id) {
+              return {
+                ...medication,
+                medication: {
+                  ...medication.medication,
+                  ...values,
+                },
+              };
+            }
+            return medication;
+          });
+          setMedications(updatedMedications);
+          handleMedicationCancel();
+        } else {
+          openNotification.error({
+            message: "Error",
+            description: response.message,
+            type: "error",
+          });
+        }
       }
     } catch (error: any) {
       console.error("error while saving medication: ", error);
@@ -189,7 +226,7 @@ const Medication: React.FC = () => {
       <h1 className="text-xl text-[#002A48]">Upcoming Medications</h1>
       <Carousel autoplay arrows dots>
         {getUpcomingMedications(medications).map((item: any, index) => (
-          <div key={index}>{JSON.stringify(item)}</div>
+          <MedicationCard key={index} data={item} />
         ))}
       </Carousel>
       <div className=" w-full flex flex-row justify-between items-center gap-4 mb-4">
@@ -203,7 +240,11 @@ const Medication: React.FC = () => {
           </button>
         </div>
       </div>
-      <MedicationTable data={medications} handleDeleteClick={handleDeleteClick} handleEditClick={handleEditClick}/>
+      <MedicationTable
+        data={medications}
+        handleDeleteClick={handleDeleteClick}
+        handleEditClick={handleEditClick}
+      />
 
       {action && showMedicationModal && (
         <MedicationModal
