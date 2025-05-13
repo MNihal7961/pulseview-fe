@@ -196,16 +196,20 @@ const GoalPage: React.FC = () => {
 
   return (
     <section className="mb-4 flex flex-col gap-y-4">
-      <h1 className="text-xl text-[#002A48]">Active Goals 🎯</h1>
-      <Carousel autoplay arrows dots>
-        {goals
-          .filter((goal) => goal.status === "active")
-          .map((item: Goal, index) => (
-            <div key={index}>
-              <ActiveGoalCard key={index} goal={item} />
-            </div>
-          ))}
-      </Carousel>
+      {goals.filter((goal) => goal.status === "active").length > 0 && (
+        <>
+          <h1 className="text-xl text-[#002A48]">Active Goals 🎯</h1>
+          <Carousel autoplay arrows dots>
+            {goals
+              .filter((goal) => goal.status === "active")
+              .map((item: Goal, index) => (
+                <div key={index}>
+                  <ActiveGoalCard key={index} goal={item} />
+                </div>
+              ))}
+          </Carousel>
+        </>
+      )}
       <div className=" w-full flex flex-row justify-between items-center gap-4 mb-4">
         <h1 className="text-xl text-[#002A48]">My Goals</h1>
         <div className="flex flex-row gap-4">
