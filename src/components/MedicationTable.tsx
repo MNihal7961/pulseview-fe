@@ -1,5 +1,6 @@
 import React from "react";
 import type { Medication, MedicationWithLogs } from "../types/types";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 interface MedicationTableProps {
   data: MedicationWithLogs[];
@@ -87,15 +88,18 @@ const MedicationTable: React.FC<MedicationTableProps> = ({
                 })}
               </td>
               <td className="px-6 py-4">
-                <div className="flex gap-2 flex-row">
-                  <button className="text-blue-600 hover:text-blue-700" onClick={() => handleEditClick(item.medication)}>
-                    Edit
+                <div className="flex gap-x-4 flex-row">
+                  <button
+                    onClick={() => handleEditClick(item.medication)}
+                    className="text-blue-600 hover:text-blue-700 cursor-pointer"
+                  >
+                    <EditOutlined />
                   </button>
-                  <button className="text-red-600 hover:text-red-700" onClick={() => handleDeleteClick(item.medication)}>
-                    Delete
-                  </button>
-                  <button className="text-green-600 hover:text-green-700">
-                    view logs
+                  <button
+                    onClick={() => handleDeleteClick(item.medication)}
+                    className="text-red-600 hover:text-red-700 cursor-pointer"
+                  >
+                    <DeleteOutlined />
                   </button>
                 </div>
               </td>
