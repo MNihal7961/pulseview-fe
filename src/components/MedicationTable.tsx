@@ -1,11 +1,17 @@
 import React from "react";
-import type { MedicationWithLogs } from "../types/types";
+import type { Medication, MedicationWithLogs } from "../types/types";
 
 interface MedicationTableProps {
   data: MedicationWithLogs[];
+  handleEditClick: (medication: Medication) => void;
+  handleDeleteClick: (medication: Medication) => void;
 }
 
-const MedicationTable: React.FC<MedicationTableProps> = ({ data }) => {
+const MedicationTable: React.FC<MedicationTableProps> = ({
+  data,
+  handleDeleteClick,
+  handleEditClick,
+}) => {
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
@@ -82,10 +88,10 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ data }) => {
               </td>
               <td className="px-6 py-4">
                 <div className="flex gap-2 flex-row">
-                  <button className="text-blue-600 hover:text-blue-700">
+                  <button className="text-blue-600 hover:text-blue-700" onClick={() => handleEditClick(item.medication)}>
                     Edit
                   </button>
-                  <button className="text-red-600 hover:text-red-700">
+                  <button className="text-red-600 hover:text-red-700" onClick={() => handleDeleteClick(item.medication)}>
                     Delete
                   </button>
                   <button className="text-green-600 hover:text-green-700">
