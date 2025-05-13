@@ -10,8 +10,10 @@ interface WidgetCardProps {
   title: string;
   value: number;
   unit: string;
-  lastUpdatedOn: Date;
+  lastUpdatedOn: Date | null;
   handleClick: () => void;
+  medicationTiming: string | null;
+  intakeCondition: string | null;
 }
 
 const WidgetCard: React.FC<WidgetCardProps> = ({
@@ -20,6 +22,8 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
   unit,
   handleClick,
   lastUpdatedOn,
+  medicationTiming,
+  intakeCondition,
 }) => {
   return (
     <div className="transition-shadow duration-300 ease-in-out hover:shadow-md rounded-xl bg-white h-full">
@@ -37,15 +41,27 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
             <span className="text-lg font-medium text-gray-500">{unit}</span>
           </div>
 
-          <Tooltip
-            title={`Last updated on ${dayjs(lastUpdatedOn).format(
-              "MMM D, YYYY h:mm A"
-            )}`}
-          >
-            <span className="text-xs text-gray-400">
-              Updated: {dayjs(lastUpdatedOn).fromNow()}
-            </span>
-          </Tooltip>
+          {lastUpdatedOn && (
+            <Tooltip
+              title={`Last updated on ${dayjs(lastUpdatedOn).format(
+                "MMM D, YYYY h:mm A"
+              )}`}
+            >
+              <span className="text-xs text-gray-400">
+                Updated: {dayjs(lastUpdatedOn).fromNow()}
+              </span>
+            </Tooltip>
+          )}
+
+          {medicationTiming && (
+            <Tooltip
+              title={`You have a medication timing of ${medicationTiming} and your intake condition is ${intakeCondition}`}
+            >
+              <span className="text-xs text-gray-400">
+                Medication Timing: {medicationTiming} ({intakeCondition})
+              </span>
+            </Tooltip>
+          )}
 
           <button
             onClick={handleClick}
