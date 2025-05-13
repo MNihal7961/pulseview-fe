@@ -72,6 +72,24 @@ const Signin = () => {
         <div className="flex  flex-col md:flex-row justify-center items-center w-full h-full">
           <div className="w-full hidden md:block md:w-1/2 h-screen signin-left-section"></div>
           <div className="w-full md:w-1/2 h-screen flex flex-col justify-center xl:px-28  md:py-14 py-6 lg:px-20 px-8 sm:px-6 bg-white">
+            <div className="flex flex-row justify-between gap-x-4">
+              <div className="p-1 border">
+                <p className="font-bold text-red-600">
+                  Use below credentials for testing for new user experience
+                </p>
+                <p className="font-bold text-red-600">
+                  email : nihal@gmail.com
+                </p>
+                <p className="font-bold text-red-600">password : 12345</p>
+              </div>
+              <div className="p-1 border">
+                <p className="font-bold text-red-600">
+                  Use below credentials for testing for existing user experience
+                </p>
+                <p className="font-bold text-red-600">email : test@gmail.com</p>
+                <p className="font-bold text-red-600">password : 123</p>
+              </div>
+            </div>
             <Title className="text-center !text-primary mb-6">Sign In</Title>
             <div className="mt-4 flex items-center justify-center">
               <Form
