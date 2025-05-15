@@ -146,7 +146,7 @@ const Signin = () => {
                   size="large"
                   htmlType="submit"
                   disabled={loading}
-                  className="bg-[#002a48] text-white mt-8 mb-4 w-full"
+                  className="!bg-[#002a48] !text-white mt-8 mb-4 w-full"
                 >
                   Sign In
                 </Button>
